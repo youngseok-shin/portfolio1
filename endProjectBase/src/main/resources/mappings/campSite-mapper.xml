@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--맵퍼파일생성후반드시sql-map-config.xml파일에mapper등록해줘야함-->
+<mapper namespace="campSiteMapper">
+	<!-- 캠핑장VO -->
+	<resultMap type="com.spring.biz.vo.CampSiteVO" id="campSite">
+		<result column="CAMP_NUM"				property="campNum"/>
+		<result column="REVIEW_CNT"				property="reviewCnt"/>
+		<result column="VIEWS_CNT"				property="viewsCnt"/>
+		<result column="RECO_CNT"				property="recoCnt"/>
+		<result column="CONTENT_ID"				property="contentId"/>
+		<result column="FACLT_NM"				property="facltNm"/>
+		<result column="LINE_INTRO"				property="lineIntro"/>
+		<result column="INTRO"					property="intro"/>
+		<result column="TRSAGNT_NO"				property="trsagntNo"/>
+		<result column="DO_NM"					property="doNm"/>
+		<result column="SIGUNGU_NM"				property="sigunguNm"/>
+		<result column="ADDR1"					property="addr1"/>
+		<result column="ADDR2"					property="addr2"/>
+		<result column="ZIPCODE"				property="zipcode"/>
+		<result column="TEL"					property="tel"/>
+		<result column="SBRS_CL"				property="sbrsCl"/>
+		<result column="POSBL_FCLTY_CL"			property="posblFcltyCl"/>
+		<result column="THEMA_ENVRN_CL"			property="themaEnvrnCl"/>
+		<result column="MANAGE_STTUS"			property="manageSttus"/>
+		<result column="INDUTY"					property="induty"/>
+		<result column="LCT_CL"					property="lctCl"/>
+		<result column="FACLT_DIV_NM"			property="facltDivNm"/>
+		<result column="MAP_X"					property="mapX"/>
+		<result column="MAP_Y"					property="mapY"/>
+		<result column="HOMEPAGE"				property="homepage"/>
+		<result column="RESVE_CL"				property="resveCl"/>
+		<result column="RESVE_URL"				property="resveUrl"/>
+		<result column="GNRL_SITE_CO"			property="gnrlSiteCo"/>
+		<result column="AUTO_SITE_CO"			property="autoSiteCo"/>
+		<result column="GLAMP_SITE_CO"			property="glampSiteCo"/>
+		<result column="CARAV_SITE_CO"			property="caravSiteCo"/>
+		<result column="INDVDL_CARAV_SITE_CO"	property="indvdlCaravSiteCo"/>
+		<result column="SITE_BOTTOM_CL1"		property="siteBottomCl1"/>
+		<result column="SITE_BOTTOM_CL2"		property="siteBottomCl2"/>
+		<result column="SITE_BOTTOM_CL3"		property="siteBottomCl3"/>
+		<result column="SITE_BOTTOM_CL4"		property="siteBottomCl4"/>
+		<result column="SITE_BOTTOM_CL5"		property="siteBottomCl5"/>
+		<result column="ANIMAL_CMG_CL"			property="animalCmgCl"/>
+		<result column="OPER_PD_CL"				property="operPdCl"/>
+		<result column="OPER_DE_CL"				property="operDeCl"/>
+		<result column="FIRST_IMAGE_URL"		property="firstImageUrl"/>
+		<result column="CREATEDTIME"			property="createdtime"/>
+		<result column="MODIFIEDTIME"			property="modifiedtime"/>
+		<result column="ROW_NUM"				property="rowNum"/>
+	</resultMap>
+	
+	<!-- 찜하기VO -->
+	<resultMap type="com.spring.biz.vo.CampSelectVO" id="campSelect">
+		<result column="SELECT_NUM"				property="selectNum"/>
+		<result column="CAMP_NUM"				property="campNum"/>
+		<result column="MEMBER_NUM"				property="memberNum"/>
+	</resultMap>
+
+	<!-- 추천하기VO -->
+	<resultMap type="com.spring.biz.vo.CampRecommendVO" id="campRecommend">
+		<result column="RECOMMEND_NUM"			property="recommendNum"/>
+		<result column="CAMP_NUM"				property="campNum"/>
+		<result column="MEMBER_NUM"				property="memberNum"/>
+	</resultMap>
+	
+	<!-- 캠핑장 데이터 업데이트 시작 -->
+	
+	<!-- 캠핑장 데이터 생성 -->
+	<insert id="campSiteUpload">
+			INSERT INTO CAMPING_SITE(
+			CAMP_NUM
+			, REVIEW_CNT
+			, VIEWS_CNT
+			, RECO_CNT
+			, CONTENT_ID
+			, FACLT_NM
+			, LINE_INTRO
+			, INTRO
+			, TRSAGNT_NO
+			, DO_NM
+			, SIGUNGU_NM
+			, ADDR1
+			, ADDR2
+			, ZIPCODE
+			, TEL
+			, SBRS_CL
+			, POSBL_FCLTY_CL
+			, THEMA_ENVRN_CL
+			, MANAGE_STTUS
+			, INDUTY
+			, LCT_CL
+			, FACLT_DIV_NM
+			, MAP_X
+			, MAP_Y
+			, HOMEPAGE
+			, RESVE_CL
+			, RESVE_URL
+			, GNRL_SITE_CO
+			, AUTO_SITE_CO
+			, GLAMP_SITE_CO
+			, CARAV_SITE_CO
+			, INDVDL_CARAV_SITE_CO
+			, SITE_BOTTOM_CL1
+			, SITE_BOTTOM_CL2
+			, SITE_BOTTOM_CL3
+			, SITE_BOTTOM_CL4
+			, SITE_BOTTOM_CL5
+			, ANIMAL_CMG_CL
+			, OPER_PD_CL
+			, OPER_DE_CL
+			, FIRST_IMAGE_URL
+			, CREATEDTIME
+			, MODIFIEDTIME
+		) VALUES (
+			(SELECT NVL(MAX(CAMP_NUM),0)+1 FROM CAMPING_SITE)
+			, 0
+			, 0
+			, 0
+			, trim(#{contentId})
+			, trim(#{facltNm})
+			, trim(#{lineIntro})
+			, trim(#{intro})
+			, trim(#{trsagntNo})
+			, trim(#{doNm})
+			, trim(#{sigunguNm})
+			, trim(#{addr1})
+			, trim(#{addr2})
+			, trim(#{zipcode})
+			, trim(#{tel})
+			, trim(#{sbrsCl})
+			, trim(#{posblFcltyCl})
+			, trim(#{themaEnvrnCl})
+			, trim(#{manageSttus})
+			, trim(#{induty})
+			, trim(#{lctCl})
+			, trim(#{facltDivNm})
+			, trim(#{mapX})
+			, trim(#{mapY})
+			, trim(#{homepage})
+			, trim(#{resveCl})
+			, trim(#{resveUrl})
+			, trim(#{gnrlSiteCo})
+			, trim(#{autoSiteCo})
+			, trim(#{glampSiteCo})
+			, trim(#{caravSiteCo})
+			, trim(#{indvdlCaravSiteCo})
+			, trim(#{siteBottomCl1})
+			, trim(#{siteBottomCl2})
+			, trim(#{siteBottomCl3})
+			, trim(#{siteBottomCl4})
+			, trim(#{siteBottomCl5})
+			, trim(#{animalCmgCl})
+			, trim(#{operPdCl})
+			, trim(#{operDeCl})
+			, trim(#{firstImageUrl})
+			, trim(TO_DATE(#{createdtime},'YYYY-MM-DD hh24:mi:ss'))
+			, trim(TO_DATE(#{modifiedtime},'YYYY-MM-DD hh24:mi:ss'))
+		)
+	</insert>
+	
+	<!-- 캠핑장 데이터 삭제 -->
+	<delete id="campSiteDelte">
+		DELETE FROM CAMPING_SITE
+	</delete>
+	
+	<!-- 캠핑장 데이터 업데이트 끝 -->
+	
+	
+	<!-- 캠핑장 데이터 불러오기 -->
+	<select id="campSiteList" resultMap="campSite" parameterType="String">
+		SELECT ROW_NUM
+			, CAMP_NUM
+		    , REVIEW_CNT
+		    , VIEWS_CNT
+		    , RECO_CNT
+		    , CONTENT_ID
+		    , FACLT_NM
+		    , LINE_INTRO
+		    , INTRO
+		    , TRSAGNT_NO
+		    , DO_NM
+		    , SIGUNGU_NM
+		    , ADDR1
+		    , ADDR2
+		    , ZIPCODE
+		    , TEL
+		    , SBRS_CL
+		    , POSBL_FCLTY_CL
+		    , THEMA_ENVRN_CL
+		    , MANAGE_STTUS
+		    , INDUTY
+		    , LCT_CL
+		    , FACLT_DIV_NM
+		    , MAP_X
+		    , MAP_Y
+		    , HOMEPAGE
+		    , RESVE_CL
+		    , RESVE_URL
+		    , GNRL_SITE_CO
+		    , AUTO_SITE_CO
+		    , GLAMP_SITE_CO
+		    , CARAV_SITE_CO
+		    , INDVDL_CARAV_SITE_CO
+		    , SITE_BOTTOM_CL1
+		    , SITE_BOTTOM_CL2
+		    , SITE_BOTTOM_CL3
+		    , SITE_BOTTOM_CL4
+		    , SITE_BOTTOM_CL5
+		    , ANIMAL_CMG_CL
+		    , OPER_PD_CL
+		    , OPER_DE_CL
+		    , FIRST_IMAGE_URL
+		    , CREATEDTIME
+		    , MODIFIEDTIME
+		FROM (
+				SELECT CAMP_NUM
+					, ROWNUM AS ROW_NUM
+				    , REVIEW_CNT
+				    , VIEWS_CNT
+				    , RECO_CNT
+				    , CONTENT_ID
+				    , FACLT_NM
+				    , LINE_INTRO
+				    , INTRO
+				    , TRSAGNT_NO
+				    , DO_NM
+				    , SIGUNGU_NM
+				    , ADDR1
+				    , ADDR2
+				    , ZIPCODE
+				    , TEL
+				    , SBRS_CL
+				    , POSBL_FCLTY_CL
+				    , THEMA_ENVRN_CL
+				    , MANAGE_STTUS
+				    , INDUTY
+				    , LCT_CL
+				    , FACLT_DIV_NM
+				    , MAP_X
+				    , MAP_Y
+				    , HOMEPAGE
+				    , RESVE_CL
+				    , RESVE_URL
+				    , GNRL_SITE_CO
+				    , AUTO_SITE_CO
+				    , GLAMP_SITE_CO
+				    , CARAV_SITE_CO
+				    , INDVDL_CARAV_SITE_CO
+				    , SITE_BOTTOM_CL1
+				    , SITE_BOTTOM_CL2
+				    , SITE_BOTTOM_CL3
+				    , SITE_BOTTOM_CL4
+				    , SITE_BOTTOM_CL5
+				    , ANIMAL_CMG_CL
+				    , OPER_PD_CL
+				    , OPER_DE_CL
+				    , FIRST_IMAGE_URL
+				    , CREATEDTIME
+				    , MODIFIEDTIME
+				FROM
+				(
+					SELECT CAMP_NUM
+				    , REVIEW_CNT
+				    , VIEWS_CNT
+				    , RECO_CNT
+				    , CONTENT_ID
+				    , FACLT_NM
+				    , LINE_INTRO
+				    , INTRO
+				    , TRSAGNT_NO
+				    , DO_NM
+				    , SIGUNGU_NM
+				    , ADDR1
+				    , ADDR2
+				    , ZIPCODE
+				    , TEL
+				    , SBRS_CL
+				    , POSBL_FCLTY_CL
+				    , THEMA_ENVRN_CL
+				    , MANAGE_STTUS
+				    , INDUTY
+				    , LCT_CL
+				    , FACLT_DIV_NM
+				    , MAP_X
+				    , MAP_Y
+				    , HOMEPAGE
+				    , RESVE_CL
+				    , RESVE_URL
+				    , GNRL_SITE_CO
+				    , AUTO_SITE_CO
+				    , GLAMP_SITE_CO
+				    , CARAV_SITE_CO
+				    , INDVDL_CARAV_SITE_CO
+				    , SITE_BOTTOM_CL1
+				    , SITE_BOTTOM_CL2
+				    , SITE_BOTTOM_CL3
+				    , SITE_BOTTOM_CL4
+				    , SITE_BOTTOM_CL5
+				    , ANIMAL_CMG_CL
+				    , OPER_PD_CL
+				    , OPER_DE_CL
+				    , FIRST_IMAGE_URL
+				    , CREATEDTIME
+				    , MODIFIEDTIME
+					FROM CAMPING_SITE
+					WHERE 1 = 1
+					<if test="doNm != null and doNm != ''">
+					AND DO_NM = #{doNm}
+					</if>
+					<if test='sigunguNm != null and sigunguNm != ""'>
+					AND SIGUNGU_NM = #{sigunguNm}
+					</if>
+					<if test='facltNm != ""'>
+					AND FACLT_NM LIKE '%'||#{facltNm}||'%'
+					</if>
+					
+					ORDER BY ${selDetails}
+				)	
+			)
+			WHERE ROW_NUM BETWEEN ${startIndex} AND ${endIndex}
+	</select>
+
+	<!-- 페이징처리 테스트 -->
+<!-- 	<select id=""> -->
+		
+<!-- 	</select> -->
+
+	
+	<!-- 시군구 검색 시작 -->
+	<select id="selectDoNm" resultMap="campSite">
+		SELECT DISTINCT DO_NM
+		FROM CAMPING_SITE
+	</select>
+	
+	<select id="selectSigunguNm" resultMap="campSite">
+		SELECT DISTINCT SIGUNGU_NM
+		FROM CAMPING_SITE
+		WHERE DO_NM = #{doNm}
+	</select>
+	
+	<select id="selectFacltNm" resultMap="campSite">
+		SELECT DISTINCT CAMP_NUM
+		    , FACLT_NM
+		FROM CAMPING_SITE
+		WHERE  DO_NM = #{doNm}
+		AND SIGUNGU_NM = #{sigunguNm}
+	</select>
+	<!-- 시군구 검색 끝 -->
+	
+	<!-- 캠핑장 갯수 -->
+	<select id="campSiteCnt" resultType="int">
+		SELECT COUNT(CAMP_NUM) AS CAMP_NUM
+		FROM CAMPING_SITE
+		WHERE CAMP_NUM &lt;&gt; 0
+		<if test="doNm != null and doNm != ''">
+		AND DO_NM = #{doNm}
+		</if>
+		<if test='sigunguNm != null and sigunguNm != ""'>
+		AND SIGUNGU_NM = #{sigunguNm}
+		</if>
+		<if test='facltNm != ""'>
+		AND FACLT_NM LIKE '%'||#{facltNm}||'%'
+		</if>
+	</select>
+
+	<!-- 캠핑장 총갯수 -->
+	<select id="totalCampSiteCnt" resultType="int">
+		SELECT COUNT(*) FROM CAMPING_SITE
+	</select>
+	
+	
+	<!-- 해당 캠핑장 데이터 불러오기 -->
+	<select id="detailCampSite" resultMap="campSite">
+		SELECT CAMP_NUM
+			, REVIEW_CNT
+			, VIEWS_CNT
+			, RECO_CNT
+			, CONTENT_ID
+			, FACLT_NM
+			, LINE_INTRO
+			, INTRO
+			, TRSAGNT_NO
+			, DO_NM
+			, SIGUNGU_NM
+			, ADDR1
+			, ADDR2
+			, ZIPCODE
+			, TEL
+			, SBRS_CL
+			, POSBL_FCLTY_CL
+			, THEMA_ENVRN_CL
+			, MANAGE_STTUS
+			, INDUTY
+			, LCT_CL
+			, FACLT_DIV_NM
+			, MAP_X
+			, MAP_Y
+			, HOMEPAGE
+			, RESVE_CL
+			, RESVE_URL
+			, GNRL_SITE_CO
+			, AUTO_SITE_CO
+			, GLAMP_SITE_CO
+			, CARAV_SITE_CO
+			, INDVDL_CARAV_SITE_CO
+			, SITE_BOTTOM_CL1
+			, SITE_BOTTOM_CL2
+			, SITE_BOTTOM_CL3
+			, SITE_BOTTOM_CL4
+			, SITE_BOTTOM_CL5
+			, ANIMAL_CMG_CL
+			, OPER_PD_CL
+			, OPER_DE_CL
+			, FIRST_IMAGE_URL
+			, CREATEDTIME
+			, TO_CHAR(MODIFIEDTIME,'YYYY-MM-DD') AS MODIFIEDTIME
+		FROM CAMPING_SITE
+		WHERE CAMP_NUM = #{campNum}
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="viewCnt">
+		UPDATE CAMPING_SITE
+		SET VIEWS_CNT = VIEWS_CNT + 1
+		WHERE CAMP_NUM = #{campNum}
+	</update>
+	
+	<!-- 찜하기 -->
+	<!-- 캠핑장 찜했는지 체크 -->	
+	<select id="isAlreadyExist" resultMap="campSelect">
+		SELECT SELECT_NUM
+		FROM CAMP_SELECT
+		WHERE MEMBER_NUM = #{memberNum}
+		AND CAMP_NUM = #{campNum}
+	</select>
+	
+	<!-- 캠핑장 찜하기 데이터 인풋 -->
+	<insert id="insertSelect">
+		INSERT INTO CAMP_SELECT(
+			SELECT_NUM
+			, CAMP_NUM
+			, MEMBER_NUM
+		) VALUES (
+			(SELECT NVL(MAX(SELECT_NUM),0)+1 FROM CAMP_SELECT)
+			, ${campNum}
+			, ${memberNum}
+		)
+	</insert>
+
+ 	<!-- 찜한 캠핑장 불러오기는 맴버매퍼에서 사용 --> 
+	<!-- 캠핑장 찜목록에서 삭제 -->
+	<delete id="deleteSelect">
+		DELETE FROM CAMP_SELECT
+		WHERE MEMBER_NUM = #{memberNum}
+		AND CAMP_NUM = #{campNum}
+	</delete>
+	
+	<!-- 추천하기 -->
+	<!-- 캠핑장 추천했는지 체크 -->	
+	<select id="checkRecommend" resultMap="campRecommend">
+		SELECT RECOMMEND_NUM
+		FROM CAMP_RECOMMEND
+		WHERE MEMBER_NUM = #{memberNum}
+		AND CAMP_NUM = #{campNum}
+	</select>
+	
+	<!-- 중복추천 방지를 위한 새 테이블에 데이터 입력 -->
+	<insert id="insertRecommend">
+		INSERT INTO CAMP_RECOMMEND(
+			RECOMMEND_NUM
+			, CAMP_NUM
+			, MEMBER_NUM
+		) VALUES (
+			(SELECT NVL(MAX(RECOMMEND_NUM),0)+1 FROM CAMP_RECOMMEND)
+			, ${campNum}
+			, ${memberNum}
+		)
+	</insert>
+	
+	<!-- 추천수 증가 -->
+	<update id="increaseRecoCnt">
+		UPDATE CAMPING_SITE
+		SET RECO_CNT = RECO_CNT + 1
+		WHERE CAMP_NUM = #{campNum}
+	</update>
+	
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+

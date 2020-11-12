@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	<definition name="baseLayout" template="/WEB-INF/view/common/template.jsp">
+		<put-attribute name="title" value="Project" />
+		<put-attribute name="header" value="/WEB-INF/view/common/menu.jsp" />
+		<put-attribute name="body" value="" />
+		
+		
+		<put-attribute name="footer" value="/WEB-INF/view/common/footer.jsp" />
+		
+		
+	</definition>
+
+	<definition name="shopLayout" template="/WEB-INF/view/common/shoptemplate.jsp">
+		<put-attribute name="title" value="Project" />
+		<put-attribute name="header" value="/WEB-INF/view/common/menu.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer" value="/WEB-INF/view/common/footer.jsp" />
+		<put-attribute name="aside" value="/WEB-INF/view/common/shopLeft.jsp" />
+	</definition>
+
+	<definition name="main/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/main/{1}.jsp" />
+	</definition>
+
+	<definition name="user/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/user/{1}.jsp" />
+		<put-attribute name="footer" value="" />
+
+	</definition>
+
+	<definition name="admin/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/admin/{1}.jsp" />
+	</definition>
+
+	<definition name="board/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/board/{1}.jsp" />
+	</definition>
+
+	<definition name="shop/shopMain" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/shop/shopMain.jsp" />
+	</definition>
+	
+	<!-- <definition name="shop/shopList" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/shop/shopList.jsp" />
+		
+		
+	</definition> -->
+	
+	<!-- 
+		<definition name="shop/shopMain2" extends="baseLayout">
+		<put-attribute name="aside" value="/WEB-INF/view/shop/shopMain2.jsp" />
+		
+		
+	</definition> -->
+
+	<definition name="shop/*" extends="baseLayout">
+		<!-- <put-attribute name="header" value="/WEB-INF/view/common/shop_menu.jsp" /> -->
+		<put-attribute name="body" value="/WEB-INF/view/shop/{1}.jsp" />
+	
+	</definition>
+
+	<definition name="campsite/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/campsite/{1}.jsp" />
+	</definition>
+	
+	<definition name="qna/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/qna/{1}.jsp" />
+	</definition>
+	
+	<definition name="letter/*" extends="baseLayout">
+		<put-attribute name="body" value="/WEB-INF/view/letter/{1}.jsp" />
+	</definition>
+	
+</tiles-definitions>
+
+
+
+
+
+
+
+
+

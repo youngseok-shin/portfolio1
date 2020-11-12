@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵퍼파일 생성 후 반드시 sql-map-config.xml 파일에 mapper 등록해줘야 함 -->
+<mapper namespace="boardMapper">
+
+	<resultMap type="com.spring.biz.vo.BoardVO" id="board">
+		<result column="BOARD_NUM" property="boardNum" />
+		<result column="BOARD_WRITER" property="boardWriter" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_CONTENT" property="boardContent" />
+		<result column="BOARD_CNT" property="boardCnt" />
+		<result column="BOARD_DATE" property="boardDate" />
+		<result column="DEL_DATE" property="delDate" />
+		<result column="DEL_YN" property="delYn" />
+	</resultMap>
+
+
+	<resultMap type="com.spring.biz.vo.BoardVO2" id="board2">
+		<result column="BOARD_NUM" property="boardNum" />
+		<result column="BOARD_WRITER" property="boardWriter" />
+		<result column="BOARD_TITLE" property="boardTitle" />
+		<result column="BOARD_CONTENT" property="boardContent" />
+		<result column="BOARD_CNT" property="boardCnt" />
+		<result column="BOARD_DATE" property="boardDate" />
+		<result column="DEL_DATE" property="delDate" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="MAIN_IMG" property="mainImg" />
+		<result column="FACLT_NM" property="facltNm" />
+	</resultMap>
+
+	<resultMap type="com.spring.biz.vo.BoardImageVO" id="image">
+		<result column="IMAGE_ID" property="imageId" />
+		<result column="BOARD_NUM" property="boardNum" />
+		<result column="BOARD_IMG" property="boardImg" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="MEBMER_NUM" property="memberNum" />
+	</resultMap>
+	
+	
+	<resultMap type="com.spring.biz.vo.CommentVO" id="comment">
+		<result column="COMMENT_NUM" 	property="commentNum" />
+		<result column="BOARD_NUM"	 	property="boardNum" />
+		<result column="MEMBER_NAME" 	property="memberName" />
+		<result column="CONTENT"		property="content" />
+		<result column="CREATE_DATE" 	property="createDate" />
+	</resultMap>
+	
+	
+	<insert id="insertNewsBoard">
+		INSERT INTO BOARD1(
+			BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_CONTENT
+		) VALUES (
+			(SELECT NVL(MAX(BOARD_NUM) +1 , 1 ) FROM
+			BOARD1)
+			,#{boardTitle}
+			,#{boardContent}
+		)
+	</insert>
+
+	<select id="selectNewsBoard" resultMap="board">
+		SELECT
+			BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_WRITER
+			,BOARD_CONTENT
+			,BOARD_CNT
+			,TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+		FROM BOARD1
+		WHERE BOARD_NUM = #{boardNum}
+	</select>
+
+	<select id="selectNewsList" resultMap="board">
+		SELECT
+			BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_WRITER
+			,BOARD_CONTENT
+			,TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+			,BOARD_CNT
+		FROM BOARD1
+		ORDER BY BOARD_NUM DESC
+	</select>
+
+	<!-- 리다이렉트 할때 글쓴거 바로 볼수있게 하기 -->
+	<select id="recentBoardNum" resultType="int">
+		SELECT MAX(BOARD_NUM)
+		FROM
+		BOARD1
+	</select>
+
+	<select id="recentBoardNum2" resultType="int">
+		SELECT MAX(BOARD_NUM)
+		FROM
+		BOARD2
+	</select>
+
+	<delete id="deleteBoard">
+		DELETE
+		FROM BOARD1
+		WHERE BOARD_NUM = #{boardNum}
+	</delete>
+
+	<delete id="deleteBoard2">
+		DELETE
+		FROM BOARD2
+		WHERE BOARD_NUM = #{boardNum}
+	</delete>
+
+	<delete id="deleteBoard3">
+		DELETE
+		FROM BOARD3
+		WHERE BOARD_NUM = #{boardNum}
+	</delete>
+
+	<insert id="insertImage">
+		INSERT INTO BOARD2 (
+			BOARD_NUM
+			,BOARD_WRITER
+			,BOARD_TITLE
+			,BOARD_CONTENT
+			<if test="mainImg != null and mainImg != ''">
+			,MAIN_IMG
+			</if>
+			,FACLT_NM
+		) VALUES (
+			(SELECT NVL(MAX(BOARD_NUM)+1 , 1)
+			FROM BOARD2)
+			,#{boardWriter}
+			,#{boardTitle}
+			,#{boardContent}
+			<if test="mainImg != null and mainImg != ''">
+			,#{mainImg}
+			</if>
+			,#{facltNm}
+		)
+	</insert>
+
+	<select id="selectImageReview" resultMap="board2">
+		SELECT
+			BOARD_WRITER
+			,BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_CONTENT
+			,BOARD_CNT
+			,TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+			, FACLT_NM
+			, MAIN_IMG
+		FROM BOARD2
+		ORDER BY BOARD_NUM DESC
+	</select>
+
+
+	<insert id="insertReviewBoard">
+		INSERT INTO BOARD2(
+			BOARD_TITLE
+			,BOARD_CONTENT
+			,BOARD_WRITER
+			,TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') AS BOARD_DATE
+		) VALUES (
+			,#{boardTitle}
+			,#{boardContent}
+			,#{boardWriter}
+		)
+	</insert>
+
+
+	<!-- 검색 -->
+	<select id="selectList" resultMap="board">
+		SELECT	
+			BOARD_TITLE
+		 	, BOARD_WRITER			, TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') AS BOARD_DATE 
+			, BOARD_NUM
+			, BOARD_CNT
+		FROM BOARD1
+		<if test="searchValue != null and searchValue != ''">
+		WHERE UPPER(${searchKeyword}) LIKE UPPER('%' ||#{searchValue}|| '%')
+		</if>
+		ORDER BY BOARD_NUM DESC
+	</select>
+
+	<!-- 검색 -->
+	<select id="selectList3" resultMap="board">
+		SELECT
+			BOARD_TITLE
+			, BOARD_WRITER
+			, TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') AS BOARD_DATE
+			, BOARD_NUM
+			, BOARD_CNT
+		FROM BOARD3
+		<if test="searchValue != null and searchValue != ''">
+		WHERE UPPER(${searchKeyword}) LIKE UPPER('%' ||#{searchValue}|| '%')
+		</if>
+		ORDER BY BOARD_NUM DESC
+	</select>
+
+	<!-- 검색 2리뷰 -->
+	<select id="selectList2" resultMap="board2">
+		SELECT
+			BOARD_TITLE
+			, BOARD_WRITER
+			, TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+			, BOARD_NUM
+			, BOARD_CONTENT
+			, BOARD_CNT
+			, FACLT_NM
+			, MAIN_IMG
+		FROM BOARD2
+		<if test="searchValue != null and searchValue != ''">
+		WHERE UPPER(${searchKeyword}) LIKE UPPER('%' ||#{searchValue}|| '%')
+		</if>
+		ORDER BY BOARD_NUM DESC
+	</select>
+
+	<select id="selectNewsBoardReview" resultMap="board2">
+
+		SELECT BOARD_NUM
+			, BOARD_TITLE
+			, BOARD_WRITER
+			, BOARD_CONTENT
+			, BOARD_CNT
+			, TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+			, FACLT_NM
+		FROM BOARD2
+		WHERE BOARD_NUM = #{boardNum}
+	</select>
+
+
+	<update id="updateNewsForm">
+		UPDATE BOARD1
+		SET
+		BOARD_TITLE = #{boardTitle}
+		, BOARD_CONTENT = #{boardContent}
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+
+
+
+
+	<update id="updateReviewForm">
+		UPDATE BOARD2
+		SET
+		BOARD_TITLE = #{boardTitle}
+		,BOARD_CONTENT = #{boardContent}
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+
+
+
+	<update id="updateBoardCnt">
+		UPDATE BOARD1
+		SET
+		BOARD_CNT = BOARD_CNT + 1
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+
+
+	<update id="updateBoardCnt2">
+		UPDATE BOARD2
+		SET
+		BOARD_CNT = BOARD_CNT + 1
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+
+	<update id="updateBoardCnt3">
+		UPDATE BOARD3
+		SET
+		BOARD_CNT = BOARD_CNT + 1
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+
+	<insert id="insertNoticeBoard">
+		INSERT INTO BOARD3(
+		BOARD_NUM
+		,BOARD_TITLE
+		,BOARD_CONTENT
+		)
+		VALUES(
+		(SELECT NVL(MAX(BOARD_NUM) +1 , 1 ) FROM
+		BOARD3)
+		,#{boardTitle}
+		,#{boardContent}
+		)
+	</insert>
+
+	<select id="selectNoticeList" resultMap="board">
+		SELECT
+			BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_WRITER
+			,BOARD_CONTENT
+			,TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+			,BOARD_CNT
+		FROM BOARD3
+	    ORDER BY BOARD_NUM DESC
+	</select>
+
+	<select id="selectNoticeBoard" resultMap="board">
+		SELECT
+			BOARD_NUM
+			,BOARD_TITLE
+			,BOARD_WRITER
+			,BOARD_CONTENT
+			,BOARD_CNT
+			,TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') AS BOARD_DATE
+		FROM BOARD3
+		WHERE BOARD_NUM = #{boardNum}
+	</select>
+
+	<update id="updateNoticeForm">
+		UPDATE BOARD3
+		SET
+		BOARD_TITLE = #{boardTitle}
+		,BOARD_CONTENT = #{boardContent}
+		WHERE BOARD_NUM = #{boardNum}
+	</update>
+	
+	<!-- 댓글달기 -->
+	<insert id="insertComment">
+		INSERT INTO BOARD2_COMMENT (
+			COMMENT_NUM
+			, BOARD_NUM
+			, MEMBER_NAME
+			, CONTENT
+		) VALUES (
+			(SELECT NVL(MAX(COMMENT_NUM) +1 , 1 ) FROM BOARD2_COMMENT)
+			, #{boardNum}
+			, #{memberName}
+			, #{content}
+		)
+	</insert>
+	
+	<!-- 댓글불러오기 -->
+	<select id="selectCommentList" resultMap="comment">
+		SELECT COMMENT_NUM
+		    , BOARD_NUM
+		    , MEMBER_NAME
+		    , CONTENT
+		    , TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') AS CREATE_DATE
+		FROM BOARD2_COMMENT
+		WHERE BOARD_NUM = ${boardNum}
+		ORDER BY COMMENT_NUM DESC
+	</select>
+	
+	<!-- 댓글삭제 -->
+	<delete id="commentDelete">
+		DELETE FROM BOARD2_COMMENT
+		WHERE COMMENT_NUM = ${commentNum}
+	</delete>
+	
+	<!-- 글삭제시 댓글도 같이 삭제 -->
+	<delete id="reviewCommentDelete">
+		DELETE FROM BOARD2_COMMENT
+		WHERE BOARD_NUM = #{boardNum}
+	</delete>
+	
+	<!-- CAMPsEARCH 에서 후기 리스트 불러오기 -->
+	<select id="campSearchReview" resultMap="board2">
+		SELECT BOARD_NUM 
+			, BOARD_WRITER
+		    , BOARD_TITLE
+		    , BOARD_CNT
+		    , TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') AS BOARD_DATE
+		    , FACLT_NM
+		FROM BOARD2 
+		WHERE FACLT_NM = #{facltNm}
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- shop mapper 쇼핑몰 -->
+<!-- 맵퍼파일 생성 후 반드시 sql-map-config.xml 파일에 mapper 등록해줘야 함 -->
+<mapper namespace="shopMapper">
+	<resultMap type="com.spring.biz.vo.ShopVO" id="shop">
+		<result column="GOODS_ID" property="goodsId" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="GOODS_NAME" property="goodsName" />
+		<result column="GOODS_PRICE" property="goodsPrice" />
+		<result column="GOODS_CONTENT" property="goodsContent" />
+		<result column="GOODS_CREATE_DATE" property="goodsCreateDate" />
+		<result column="GOODS_STATUS" property="goodsStatus" />
+		<result column="CATEGORY_CODE" property="categoryCode" />
+		<result column="GOODS_COLOR" property="goodsColor" />
+		<result column="GOODS_MADE_FROM" property="goodsMadeFrom" />
+		<result column="GOODS_CNT" property="goodsCnt" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="TOTAL_PRICE" property="totalPrice" />
+	</resultMap>
+
+	<resultMap type="com.spring.biz.vo.ImageVO" id="image">
+		<result column="IMAGE_ID" property="imageId" />
+		<result column="GOODS_ID" property="goodsId" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="CREATE_DATE" property="createDate" />
+	</resultMap>
+
+	<resultMap type="com.spring.biz.vo.CartVO" id="cart">
+		<result column="CART_ID" property="cartId" />
+		<result column="GOODS_ID" property="goodsId" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="GOODS_CNT" property="goodsCnt" />
+		<result column="IS_DELETE" property="isDelete" />
+		<result column="GOODS_COLOR" property="goodsColor" />
+	</resultMap>
+
+	<resultMap type="com.spring.biz.vo.CartListVO" id="cartList">
+		<result column="GOODS_ID" property="goodsId" />
+		<result column="CART_ID" property="cartId" />
+		<result column="GOODS_NAME" property="goodsName" />
+		<result column="MEMBER_ID" property="memberId" />
+		<result column="MEMBER_NAME" property="memberName" />
+		<result column="CREATE_DATE" property="createDate" />
+		<result column="GOODS_PRICE" property="goodsPrice" />
+		<result column="GOODS_CNT" property="goodsCnt" />
+		<result column="TOTAL_PRICE" property="totalPrice" />
+		<result column="GOODS_COLOR" property="goodsColor" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="IS_DEL" property="isDel" />
+	</resultMap>
+
+	<!-- 상품ID 매기는 쿼리 -->
+	<select id="getMaxId" resultType="int">
+		SELECT NVL(MAX(GOODS_ID) + 1, 1) 
+		FROM SHOP_GOODS
+	</select>
+
+	<!-- 이미지 삽입 -->
+	<insert id="insertImage">
+		INSERT ALL
+		<foreach collection="imageList" item="image">
+			INTO SHOP_IMAGE (
+				IMAGE_ID
+				, GOODS_ID
+				, FILE_NAME
+				, MEMBER_ID
+			) VALUES (
+				#{image.imageId}
+			 	, #{image.goodsId}
+			 	, #{image.fileName}
+			 	, #{image.memberId}
+			)
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<!-- 상품등록 쿼리 -->
+	<insert id="insertShopGoods">
+		INSERT INTO SHOP_GOODS(
+			GOODS_ID
+			,GOODS_NAME
+			,GOODS_PRICE
+			, GOODS_CONTENT
+			,GOODS_COLOR
+			,GOODS_MADE_FROM
+			,MEMBER_ID
+		)VALUES(
+			#{goodsId}
+			,#{goodsName} 
+			,#{goodsPrice}
+			,#{goodsContent}
+			,#{goodsColor}
+			,#{goodsMadeFrom}
+			,#{memberId}
+		)
+	</insert>
+
+	<!-- 쇼핑몰에서 상품리스트조회 쿼리 -->
+	<select id="selectShopGoodsList" resultMap="shop">
+		SELECT G.GOODS_ID
+			, GOODS_NAME
+			, GOODS_PRICE
+			, GOODS_CONTENT
+			, GOODS_COLOR
+			, GOODS_MADE_FROM
+			, FILE_NAME
+		FROM SHOP_GOODS G, SHOP_IMAGE I
+		WHERE G.GOODS_ID = I.GOODS_ID
+		AND IMAGE_ID LIKE '%'||'1'
+	</select>
+	
+	<!-- 상품 하나하나 당 조회하는 쿼리 -->
+	<select id="selectShopGoods" resultMap="shop">
+		SELECT G.GOODS_ID
+			, GOODS_NAME
+			, GOODS_PRICE
+			, GOODS_CONTENT
+			, GOODS_COLOR
+			, GOODS_MADE_FROM
+			, FILE_NAME
+			,TO_CHAR(GOODS_CREATE_DATE,'YYYY-MM-DD') AS GOODS_CREATE_DATE
+		FROM SHOP_GOODS G, SHOP_IMAGE I
+		WHERE G.GOODS_ID = I.GOODS_ID
+		AND IMAGE_ID LIKE '%1'
+		AND G.GOODS_ID = #{goodsId}
+	</select>
+
+	<!-- 상세이미지 불러오기 쿼리 -->
+	<select id="selectShopImages" resultMap="image">
+		SELECT FILE_NAME
+		FROM SHOP_IMAGE
+		WHERE GOODS_ID = #{goodsId}
+		AND IMAGE_ID NOT LIKE '%1'
+	</select>
+
+	<!-- 장바구니 들어가는 쿼리 -->
+	<insert id="insertCart">
+		MERGE INTO SHOP_CART
+			USING DUAL
+			ON ( GOODS_ID = #{goodsId}
+				AND MEMBER_ID = #{memberId}
+				AND GOODS_COLOR = #{goodsColor} )
+		WHEN MATCHED THEN
+			UPDATE SET
+			GOODS_CNT = GOODS_CNT + #{goodsCnt}
+		WHEN NOT MATCHED THEN
+			INSERT (
+				MEMBER_ID
+				,GOODS_ID
+				,GOODS_CNT
+				,CART_ID
+				, GOODS_COLOR
+			) VALUES (
+				#{memberId}
+				,#{goodsId}
+				,#{goodsCnt}
+				, 'CART' || TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+				, #{goodsColor}
+			)
+	</insert>
+
+	<!-- 장바구니 리스트 뽑는 쿼리 -->
+	<select id="selectCartList" resultMap="cartList">
+		SELECT G.GOODS_ID
+			, C.CART_ID
+			, C.GOODS_CNT
+			, G.GOODS_NAME
+			, GOODS_PRICE
+			, M.MEMBER_NAME
+			, C.MEMBER_ID
+			, C.CREATE_DATE
+			, C.GOODS_COLOR
+			, I.FILE_NAME
+			, (G.GOODS_PRICE * C.GOODS_CNT) AS TOTAL_PRICE
+		FROM SHOP_CART C, SHOP_GOODS G, MEMBER M, SHOP_IMAGE I
+		WHERE G.GOODS_ID = C.GOODS_ID
+		AND C.MEMBER_ID = M.MEMBER_ID
+		AND C.GOODS_ID = I.GOODS_ID
+		AND I.IMAGE_ID LIKE '%1'
+		AND M.MEMBER_ID = #{memberId}
+	</select>
+
+	<!-- 장바구니에서 총 가격 -->
+	<select id="selectTotalPrice" resultMap="cartList">
+		SELECT SUM(C.GOODS_CNT * G.GOODS_PRICE) AS TOTAL_PRICE
+		FROM SHOP_CART C, SHOP_GOODS G
+		WHERE C.GOODS_ID = G.GOODS_ID
+		AND C.MEMBER_ID = #{memberId}
+	</select>
+
+
+	<delete id="deleteCart">
+		DELETE SHOP_CART
+		WHERE CART_ID
+		<foreach collection="cartIdList" item="cartId" open="in ("
+			close=")" separator=","> #{cartId}
+		</foreach>
+	</delete>
+
+
+	<delete id="deleteEach">
+		DELETE SHOP_CART
+		WHERE CART_ID = #{cartId}
+	</delete>
+
+	<select id="selectGotoBuy" resultMap="cartList">
+		SELECT G.GOODS_ID
+			,C.CART_ID
+			,C.GOODS_CNT
+			,G.GOODS_NAME
+			,GOODS_PRICE
+			,M.MEMBER_NAME
+			,C.MEMBER_ID
+			,C.CREATE_DATE
+			,C.GOODS_COLOR
+			, I.FILE_NAME
+			, (G.GOODS_PRICE * C.GOODS_CNT) AS TOTAL_PRICE
+		FROM SHOP_CART C, SHOP_GOODS G, MEMBER M, SHOP_IMAGE I
+		WHERE G.GOODS_ID= C.GOODS_ID
+		AND C.MEMBER_ID = M.MEMBER_ID
+		AND C.GOODS_ID = I.GOODS_ID
+		AND I.IMAGE_ID LIKE '%1'
+		AND CART_ID
+		<foreach collection="cartIdList" item="cartId" open="in ("
+			close=")" separator=","> #{cartId}
+		</foreach>
+	</select>
+	
+	<!-- 바로구매 -->
+	<select id="shopOneBuy" resultMap="shop">
+		SELECT G.GOODS_ID
+			, G.GOODS_NAME
+			, GOODS_PRICE
+			, M.MEMBER_NAME
+			, M.MEMBER_ID
+			, I.FILE_NAME
+			, (G.GOODS_PRICE * #{goodsCnt}) AS TOTAL_PRICE
+		FROM SHOP_GOODS G, MEMBER M, SHOP_IMAGE I
+		WHERE G.MEMBER_ID = M.MEMBER_ID
+		AND G.GOODS_ID = I.GOODS_ID
+		AND G.GOODS_ID = #{goodsId}
+		AND I.IMAGE_ID LIKE '%1'
+
+	</select>
+	
+	
+	<update id="updateProduct">
+		UPDATE SHOP_GOODS
+		SET
+		GOODS_ID =#{goodsId}
+		,GOODS_NAME = #{goodsName}
+        ,GOODS_PRICE =#{goodsPrice}
+        ,GOODS_CONTENT=#{goodsContent}
+        ,GOODS_COLOR=#{goodsColor}
+        ,GOODS_MADE_FROM =#{goodsMadeFrom}
+       	WHERE GOODS_ID =#{goodsId}
+	</update>
+	
+	<delete id="deleteProduct">
+		DELETE
+		FROM SHOP_GOODS
+		WHERE GOODS_ID  =#{goodsId}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+

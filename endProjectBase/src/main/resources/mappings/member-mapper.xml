@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵퍼파일 생성 후 반드시 sql-map-config.xml 파일에 mapper 등록해줘야 함 -->
+<mapper namespace="memberMapper">
+	<resultMap type="com.spring.biz.vo.MemberVO" id="member">
+		<result column="MEMBER_NUM" 		property="memberNum" />
+		<result column="MEMBER_ID"			property="memberId" />
+		<result column="MEMBER_PASSWORD" 	property="memberPassword" />
+		<result column="GENDER" 			property="gender" />
+		<result column="MEMBER_NAME" 		property="memberName" />
+		<result column="TEL1" 				property="tel1" />
+		<result column="TEL2" 				property="tel2" />
+		<result column="EMAIL" 				property="email" />
+		<result column="EMAIL_YN" 			property="emailYn" />
+		<result column="MEMBER_ADDR" 		property="memberAddr" />
+		<result column="MEMBER_DETAIL" 		property="memberDetail" />
+		<result column="REG_DATE" 			property="regDate" />
+		<result column="MODIFY_DATE" 		property="modeifyDate" />
+		<result column="DEL_YN" 			property="delYn" />
+		<result column="MEMBER_TYPE" 		property="memberType" />
+	</resultMap>
+	
+	<resultMap type="com.spring.biz.vo.MessageVO" id="mes">
+		<result column="MES_NUM" 		property="mesNum" />
+		<result column="S_ID"			property="sId" />
+		<result column="R_ID" 			property="rId" />
+		<result column="TITLE" 			property="title" />
+		<result column="NOTE" 			property="note" />
+		<result column="IS_CHECKED" 	property="isChecked" />
+		<result column="INPUTDATE" 		property="inputDate" />
+		<result column="ROW_NUM" 		property="rowNum" />
+	</resultMap>
+	
+	<!-- 내 후기 -->
+	<select id="selectMyReview" resultMap="boardMapper.board2">
+		<!-- SELECT BOARD_IMG ,BOARD_NUM FROM BOARD_IMG WHERE BOARD_NUM= 1 -->
+
+		<!-- SELECT C.BOARD_WRITER ,C.BOARD_TITLE ,C.BOARD_HIT ,TO_CHAR(B.CREATE_DATE, 
+			'YYYY-MM-DD') ,B.BOARD_IMG FROM BOARD2 B, CAMP_BOARD C WHERE C.BOARD_NUM 
+			= B.BOARD_NUM -->
+
+		SELECT
+		BOARD_WRITER
+		,BOARD_NUM
+		,BOARD_TITLE
+		,BOARD_CONTENT
+		,BOARD_CNT
+		,TO_CHAR(BOARD_DATE,'YYYY-MM-DD') AS BOARD_DATE
+		, FACLT_NM
+		FROM BOARD2
+		WHERE BOARD_WRITER = #{boardWriter}
+		ORDER BY BOARD_NUM DESC
+
+
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="insertMember">
+		INSERT INTO MEMBER (
+			MEMBER_NUM
+			, MEMBER_ID
+			, MEMBER_PASSWORD
+			, MEMBER_NAME
+			, EMAIL
+			, EMAIL_YN
+			, MEMBER_TYPE
+		) VALUES (
+			(SELECT NVL(MAX(MEMBER_NUM) + 1, 1) FROM MEMBER)
+			, #{memberId}
+			, #{memberPassword}
+			, #{memberName}
+			, #{email}
+			, #{emailYn}
+			, 1
+		)
+	</insert>
+	<!-- 로그인 -->
+	<select id="selectMember" resultMap="member" >
+		SELECT MEMBER_ID
+			, MEMBER_NAME
+			, MEMBER_TYPE
+			, EMAIL
+			, MEMBER_NUM
+		FROM MEMBER
+		WHERE MEMBER_ID = #{memberId}
+		AND MEMBER_PASSWORD = #{memberPassword}
+		
+	</select>
+	<!-- 임시 비밀번호 전송 시 비밀번호 바뀌는 쿼리, 내 정보에서 비밀번호 변경 -->
+	<update id="changePwd">
+		UPDATE MEMBER
+		SET
+		MEMBER_PASSWORD = #{memberPassword}
+		WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+	<!-- 내 정보에서 비밀번호 변경 시 비밀번호 데이터 불러오는 쿼리 -->
+	<select id="inMyInfoSelPw" resultMap="member">
+		SELECT MEMBER_PASSWORD
+		FROM MEMBER
+		WHERE MEMBER_ID = #{memberId}
+	</select>
+	
+	<!-- 관리자 페이지에서 전체 회원조회 -->
+	<select id="selectAllMember" resultMap="member">
+		SELECT MEMBER_NUM
+			, MEMBER_ID
+			, MEMBER_PASSWORD
+			, MEMBER_NAME
+			, EMAIL
+			, MEMBER_TYPE
+			, REG_DATE
+		FROM MEMBER
+	</select>
+	
+	<!-- 선택 회원삭제 -->
+	<delete id="delMember">
+		DELETE FROM MEMBER
+		WHERE MEMBER_NUM IN
+		<foreach collection="memberList" item="memberNum" open="(" close=")" separator=",">
+			#{memberNum}
+		</foreach>
+	</delete>
+	
+	<!-- 메세지 개수 조회 -->
+	<select id="rMessageCnt" resultType="int">
+		SELECT COUNT(*) FROM MESSAGE
+		WHERE R_ID = #{rId}
+	</select>
+	
+	<!-- 메세지 개수 조회 -->
+	<select id="sMessageCnt" resultType="int">
+		SELECT COUNT(*) FROM MESSAGE
+		WHERE S_ID = #{sId}
+	</select>
+	
+	
+  	<insert id="sendMessage">
+		INSERT INTO MESSAGE (
+			MES_NUM
+			, S_ID
+			, R_ID
+			, TITLE
+			, NOTE
+		) VALUES (
+			AAA.NEXTVAL
+			, #{sId}
+			, #{rId}
+			, #{title}
+			, #{note}
+		)
+	</insert>
+	
+  	<insert id="reSendMessage">
+		INSERT INTO MESSAGE (
+			MES_NUM
+			, S_ID
+			, R_ID
+			, TITLE
+			, NOTE
+		) VALUES (
+			AAA.NEXTVAL
+			, #{sId}
+			, #{rId}
+			, 're:' || #{title}
+			, #{note}
+		)
+	</insert>
+	
+	<select id="selectReceiveMsgList" resultMap="mes">
+		SELECT ROW_NUM
+		    , MES_NUM
+		    , S_ID
+		    , R_ID
+		    , TITLE
+		    , NOTE
+		    , INPUTDATE
+		    , IS_CHECKED
+		FROM
+		(
+		    SELECT ROWNUM AS ROW_NUM
+		        , MES_NUM
+		        , S_ID
+		        , R_ID
+		        , TITLE
+		    	, NOTE
+		        , INPUTDATE
+		        , IS_CHECKED
+		    FROM
+		    (
+		        SELECT MES_NUM
+					, S_ID
+					, R_ID
+					, TITLE
+					, NOTE
+					, TO_CHAR(INPUTDATE, 'YYYY/MM/DD') AS INPUTDATE
+					, IS_CHECKED
+				FROM MESSAGE
+				WHERE R_ID = #{rId}
+				ORDER BY MES_NUM DESC
+		    )
+		)
+		WHERE ROW_NUM BETWEEN #{startIndex} AND #{endIndex} 
+	</select>
+	
+	<select id="selectSendMsgList" resultMap="mes">
+		SELECT ROW_NUM
+		    , MES_NUM
+		    , S_ID
+		    , R_ID
+		    , TITLE
+		    , NOTE
+		    , INPUTDATE
+		    , IS_CHECKED
+		FROM
+		(
+		    SELECT ROWNUM AS ROW_NUM
+		        , MES_NUM
+		        , S_ID
+		        , R_ID
+		        , TITLE
+		    	, NOTE
+		        , INPUTDATE
+		        , IS_CHECKED
+		    FROM
+		    (
+		        SELECT MES_NUM
+					, S_ID
+					, R_ID
+					, TITLE
+					, NOTE
+					, TO_CHAR(INPUTDATE, 'YYYY/MM/DD') AS INPUTDATE
+					, IS_CHECKED
+				FROM MESSAGE
+				WHERE S_ID = #{sId}
+				ORDER BY MES_NUM DESC
+		    )
+		)
+		WHERE ROW_NUM BETWEEN #{startIndex} AND #{endIndex}
+	</select>
+	
+	<select id="selectLetterDetail" resultMap="mes">
+		SELECT MES_NUM
+			, S_ID
+			, R_ID
+			, TITLE
+			, NOTE
+			, TO_CHAR(INPUTDATE, 'YYYY/MM/DD') AS INPUTDATE
+		FROM MESSAGE
+		WHERE MES_NUM = #{mesNum}
+	</select>
+	
+	<select id="selectNewMsgCnt" resultType="int">
+	<!-- 	SELECT COUNT(*)
+		FROM MESSAGE
+		WHERE IS_CHECKED = 'N'
+		AND R_ID IN (SELECT MEMBER_ID 
+				FROM MEMBER 
+				WHERE MEMBER_TYPE = 2) -->
+		SELECT COUNT(*)
+		FROM MESSAGE
+		WHERE IS_CHECKED = 'N'
+		AND R_ID = #{rId}
+	</select>
+	
+ 	<update id="updateIsChecked">
+		UPDATE MESSAGE
+		SET
+		IS_CHECKED = 'Y'
+		WHERE MES_NUM = #{mesNum}
+	</update>
+	
+	
+	<!-- 찜한 캠핑장 불러오기 -->
+	<select id="callSelectCamp" resultMap="campSiteMapper.campSite">
+		SELECT C.CAMP_NUM 
+		    , S.FACLT_NM
+		    , S.DO_NM
+		    , S.SIGUNGU_NM
+		    , S.ADDR1
+		    , S.TEL
+		    , S.FIRST_IMAGE_URL
+		    , S.CONTENT_ID
+		FROM CAMP_SELECT C, CAMPING_SITE S
+		WHERE C.CAMP_NUM = S.CAMP_NUM
+		AND C.MEMBER_NUM = #{memberNum}
+	</select>
+	
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
